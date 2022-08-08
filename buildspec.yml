@@ -1,0 +1,22 @@
+
+version: 0.2
+phases:
+  install:
+    commands:
+      - echo nada
+  pre_build:
+    commands:
+      - aws --version
+      - docker --version
+      - java --version
+      - mvn --version
+  build:
+    commands:
+      - mvn package
+  post_build:
+    commands:
+      - cp target/*.jar app.jar
+      - aws s3 cp app.jar s3://${BUCKET_NAME}/app.jar
+cache:
+  paths:
+    - /root/.m2/**/*
