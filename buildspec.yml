@@ -16,6 +16,7 @@ phases:
     commands:
       - cp target/*.jar app.jar
       - aws s3 cp app.jar s3://${BUCKET_NAME}/${PROJECT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/app.jar
+      - aws s3 cp app.jar s3://${BUCKET_NAME}/${PROJECT_NAME}/latest/app.jar
 cache:
   paths:
     - /root/.m2/**/*
