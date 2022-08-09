@@ -11,7 +11,7 @@ pipeline {
                         --template-file ./infra/infra.yaml \
                         --stack-name ${gitHubProjectName} \
                         --parameter-overrides \
-                            ProjectName=${PROJECT_NAME} \
+                            ProjectName=${gitHubProjectName} \
                             ProjectVersion=${env.GIT_COMMIT}
                 """
             }
