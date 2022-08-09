@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy \
+        --capabilities CAPABILITY_NAMED_IAM \
+        --template-file ./infra/infra.yaml \
+        --stack-name ${PROJECT_NAME} \
+        --parameter-overrides \
+            ProjectName=${PROJECT_NAME} \
+            ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      -  aws deploy create-deployment \
+        --application-name ${PROJECT_NAME} \
+        --deployment-group-name ${PROJECT_NAME} \
+        --s3-location bucket=${BUCKET_NAME},key=${PROJECT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip,bundleType=zip

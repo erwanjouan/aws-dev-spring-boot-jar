@@ -1,0 +1,28 @@
+def gitHubProjectName='aws-dev-spring-boot-jar'
+
+pipeline {
+        agent any
+        stages{
+            stage('Deploy in CodeBuild') {
+                steps {
+                    script{
+                        def codebuildBaseProject = 'codebuild-jenkins-slave'
+                        def bucketName = "${codebuildBaseProject}-output"
+                        awsCodeBuild \
+                            projectName: codebuildBaseProject, \
+                            cacheLocationOverride: "${bucketName}/cache", \
+                            cacheTypeOverride: 'S3', \
+                            buildSpecFile: 'infra/buildspec.yml', \
+                            region: 'eu-west-1', \
+                            credentialsType: 'jenkins', \
+                            credentialsId: 'codebuild-credentials', \
+                            gitCloneDepthOverride: '1', \
+                            sourceControlType: 'project', \
+                            sourceLocationOverride: "https://github.com/erwanjouan/${gitHubProjectName}.git", \
+                            envVariables: "[{PROJECT_NAME, ${gitHubProjectName}},{BUCKET_NAME, ${bucketName}}]"
+                    }
+                }
+            }
+        }
+    }
+}
