@@ -6,7 +6,7 @@ phases:
       - pwd
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
-        --template-file infra/infra.yaml
+        --template-file infra/infra.yml
         --stack-name ${PROJECT_NAME}
         --parameter-overrides 
             ProjectName=${PROJECT_NAME}
