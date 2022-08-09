@@ -2,9 +2,11 @@ version: 0.2
 phases:
   install:
     commands:
+      - ls
+      - pwd
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
-        --template-file ./infra/infra.yaml
+        --template-file infra/infra.yaml
         --stack-name ${PROJECT_NAME}
         --parameter-overrides 
             ProjectName=${PROJECT_NAME}
