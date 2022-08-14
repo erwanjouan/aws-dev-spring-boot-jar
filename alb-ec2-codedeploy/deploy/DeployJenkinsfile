@@ -11,7 +11,7 @@ pipeline {
                         projectName: codebuildBaseProject, \
                         cacheLocationOverride: "${bucketName}/cache", \
                         cacheTypeOverride: 'S3', \
-                        buildSpecFile: 'deployment-alb-ec2-codedeploy/buildspec.yml', \
+                        buildSpecFile: 'alb-ec2-codedeploy/deploy/buildspec.yml', \
                         region: 'eu-west-1', \
                         credentialsType: 'jenkins', \
                         credentialsId: 'codebuild-credentials', \
