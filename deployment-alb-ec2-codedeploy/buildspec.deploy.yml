@@ -2,11 +2,9 @@ version: 0.2
 phases:
   install:
     commands:
-      - ls
-      - pwd
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
-        --template-file infra/infra.yml
+        --template-file deployment-alb-ec2-codedeploy/infra.yml
         --stack-name ${PROJECT_NAME}
         --parameter-overrides 
             ProjectName=${PROJECT_NAME}

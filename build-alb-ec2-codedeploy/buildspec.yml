@@ -16,7 +16,7 @@ phases:
     commands:
       - mkdir -p revision # CodeDeploy uses the notion of ApplicationRevision
       - cp target/*.jar ./revision/app.jar
-      - cp infra/codedeploy/* ./revision
+      - cp deployment-alb-ec2-codedeploy/codedeploy/* ./revision
       - zip -r revision.zip revision
       - aws s3 cp revision.zip s3://${BUCKET_NAME}/${PROJECT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip
       - aws s3 cp revision.zip s3://${BUCKET_NAME}/${PROJECT_NAME}/latest/revision.zip

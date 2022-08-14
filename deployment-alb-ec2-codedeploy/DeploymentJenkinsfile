@@ -5,13 +5,13 @@ def bucketName = "${codebuildBaseProject}-output"
 pipeline {
         agent any
         stages{
-            stage('Deploy in CodeBuild') {
+            stage('Deploy with CodeBuild') {
                 steps {
                     awsCodeBuild \
                         projectName: codebuildBaseProject, \
                         cacheLocationOverride: "${bucketName}/cache", \
                         cacheTypeOverride: 'S3', \
-                        buildSpecFile: 'infra/buildspec.yml', \
+                        buildSpecFile: 'deployment-alb-ec2-codedeploy/buildspec.yml', \
                         region: 'eu-west-1', \
                         credentialsType: 'jenkins', \
                         credentialsId: 'codebuild-credentials', \
