@@ -5,8 +5,8 @@ phases:
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
         --template-file alb-ec2-codedeploy/build/infra.yml
-        --stack-name ${BUCKET_NAME}
-        --parameter-overrides 
+        --stack-name ${BUCKET_NAME}-build
+        --parameter-overrides
             ProjectName=${PROJECT_NAME}
             DeploymentName=${DEPLOYMENT_NAME}
   pre_build:
