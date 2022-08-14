@@ -1,0 +1,7 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation destroy
+        --capabilities CAPABILITY_NAMED_IAM
+        --stack-name ${PROJECT_NAME}
