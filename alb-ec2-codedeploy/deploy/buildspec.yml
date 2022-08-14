@@ -12,7 +12,7 @@ phases:
             ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}
   post_build:
     commands:
-      -  aws deploy create-deployment
+      - aws deploy create-deployment
         --application-name ${BUCKET_NAME}
         --deployment-group-name ${BUCKET_NAME}
-        --s3-location bucket=${BUCKET_NAME},key=${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip,bundleType=zip
+        --s3-location bucket=${BUCKET_NAME},key=latest/revision.zip,bundleType=zip
