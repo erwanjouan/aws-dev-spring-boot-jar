@@ -3,6 +3,8 @@ Description: A Java SpringBoot application deployed with EC2
 Parameters:
   ProjectName:
     Type: String
+  DeploymentName:
+    Type: String
   ProjectVersion:
     Type: String
   ApplicationPort:
@@ -424,15 +426,15 @@ Resources:
 
   CodeDeployApplication:
     Properties:
-      ApplicationName: !Ref ProjectName
+      ApplicationName: !Sub ${ProjectName}-${DeploymentName}
     Type: AWS::CodeDeploy::Application
 
   CodeDeployDeploymentGroup:
     Properties:
-      ApplicationName: !Ref ProjectName
+      ApplicationName: !Sub ${ProjectName}-${DeploymentName}
       ServiceRoleArn: !GetAtt CodeDeployer.Arn
       DeploymentConfigName: CodeDeployDefault.HalfAtATime
-      DeploymentGroupName: !Ref ProjectName
+      DeploymentGroupName: !Sub ${ProjectName}-${DeploymentName}
       DeploymentStyle:
         DeploymentOption: WITH_TRAFFIC_CONTROL # unless LoadBalancerInfo is ignored
         DeploymentType: IN_PLACE
