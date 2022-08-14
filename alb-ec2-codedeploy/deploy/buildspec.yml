@@ -13,6 +13,6 @@ phases:
   post_build:
     commands:
       -  aws deploy create-deployment
-        --application-name ${PROJECT_NAME}
-        --deployment-group-name ${PROJECT_NAME}
+        --application-name ${BUCKET_NAME}
+        --deployment-group-name ${BUCKET_NAME}
         --s3-location bucket=${BUCKET_NAME},key=${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip,bundleType=zip
