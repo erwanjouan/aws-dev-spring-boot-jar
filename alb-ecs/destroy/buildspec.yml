@@ -4,4 +4,4 @@ phases:
     commands:
       - aws cloudformation destroy
         --capabilities CAPABILITY_NAMED_IAM
-        --stack-name ${PROJECT_NAME}
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}
