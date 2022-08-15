@@ -7,6 +7,8 @@ Parameters:
     Type: String
   ProjectVersion:
     Type: String
+  ProjectDeploymentName:
+    Type: String    
   ApplicationPort:
     Type: String
     Default: 8080
@@ -426,15 +428,15 @@ Resources:
 
   CodeDeployApplication:
     Properties:
-      ApplicationName: !Sub ${ProjectName}-${DeploymentName}
+      ApplicationName: !Ref ProjectDeploymentName
     Type: AWS::CodeDeploy::Application
 
   CodeDeployDeploymentGroup:
     Properties:
-      ApplicationName: !Sub ${ProjectName}-${DeploymentName}
+      ApplicationName: !Ref ProjectDeploymentName
       ServiceRoleArn: !GetAtt CodeDeployer.Arn
       DeploymentConfigName: CodeDeployDefault.HalfAtATime
-      DeploymentGroupName: !Sub ${ProjectName}-${DeploymentName}
+      DeploymentGroupName: !Ref ProjectDeploymentName
       DeploymentStyle:
         DeploymentOption: WITH_TRAFFIC_CONTROL # unless LoadBalancerInfo is ignored
         DeploymentType: IN_PLACE

@@ -4,11 +4,12 @@ phases:
     commands:
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
-        --template-file alb-ec2-codedeploy/deploy/infra.yml
+        --template-file ${DEPLOYMENT_NAME}/deploy/infra.yml
         --stack-name ${PROJECT_DEPLOYMENT_NAME}-deploy
         --parameter-overrides 
             ProjectName=${PROJECT_NAME}
             DeploymentName=${DEPLOYMENT_NAME}
+            ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
             ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}
   post_build:
     commands:
