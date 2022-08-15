@@ -5,7 +5,7 @@ phases:
       - aws cloudformation deploy
         --capabilities CAPABILITY_NAMED_IAM
         --template-file alb-ec2-codedeploy/build/infra.yml
-        --stack-name ${BUCKET_NAME}-build
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}-build
         --parameter-overrides
             ProjectName=${PROJECT_NAME}
             DeploymentName=${DEPLOYMENT_NAME}
@@ -24,8 +24,8 @@ phases:
       - cp target/*.jar ./revision/app.jar
       - cp alb-ec2-codedeploy/deploy/codedeploy/* ./revision
       - zip -r revision.zip revision
-      - aws s3 cp revision.zip s3://${BUCKET_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip
-      - aws s3 cp revision.zip s3://${BUCKET_NAME}/latest/revision.zip
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/revision.zip
 cache:
   paths:
     - /root/.m2/**/*
