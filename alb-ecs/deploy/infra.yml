@@ -306,7 +306,7 @@ Resources:
 
   ###############
   # VPC Endpoints
-  ###############
+  ############### 
 
   VPCEndpointSecurityGroup:
     Description: Security Group to allow use of VPC Endpoints. https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html
