@@ -23,7 +23,7 @@ phases:
       - docker build -f ${DEPLOYMENT_NAME}/build/Dockerfile -t ${PROJECT_DEPLOYMENT_NAME} .
       - docker tag ${PROJECT_DEPLOYMENT_NAME}:latest 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}:latest
       - docker tag ${PROJECT_DEPLOYMENT_NAME}:latest 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}:${CODEBUILD_RESOLVED_SOURCE_VERSION}
-      - docker push --all-tags 467420073914.dkr.ecr.eu-west-1.amazonaws.com/$PROJECT_DEPLOYMENT_NAME:latest
+      - docker push --all-tags 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}
 cache:
   paths:
     - /root/.m2/**/*
