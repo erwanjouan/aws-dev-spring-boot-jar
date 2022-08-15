@@ -1,13 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: A Java SpringBoot application deployed with EC2
 Parameters:
-  ProjectName:
-    Type: String
-  DeploymentName:
+  ProjectDeploymentName:
     Type: String
 Resources:
   ArtifactOutputBucket:
     Description: Bucket for build output
     Properties:
-      BucketName: !Sub '${ProjectName}-${DeploymentName}'
+      BucketName: !Ref ProjectDeploymentName
     Type: AWS::S3::Bucket

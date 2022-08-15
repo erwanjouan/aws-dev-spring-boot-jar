@@ -1,14 +1,10 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: A Java SpringBoot application deployed with EC2
 Parameters:
-  ProjectName:
-    Type: String
-  DeploymentName:
+  ProjectDeploymentName:
     Type: String
   ProjectVersion:
     Type: String
-  ProjectDeploymentName:
-    Type: String    
   ApplicationPort:
     Type: String
     Default: 8080
@@ -220,7 +216,7 @@ Resources:
         - Ref: ALBTargetGroup
       Tags:
         - Key: Name
-          Value: !Ref ProjectName
+          Value: !Ref ProjectDeploymentName
           PropagateAtLaunch: true
         - Key: Version
           Value: !Ref ProjectVersion
