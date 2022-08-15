@@ -1,0 +1,29 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy
+        --capabilities CAPABILITY_NAMED_IAM
+        --template-file alb-ecs/build/infra.yml
+        --stack-name ${BUCKET_NAME}-build
+        --parameter-overrides
+            ProjectName=${PROJECT_NAME}
+            DeploymentName=${DEPLOYMENT_NAME}
+  pre_build:
+    commands:
+      - aws --version
+      - docker --version
+      - java --version
+      - mvn --version
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 467420073914.dkr.ecr.eu-west-1.amazonaws.com
+  build:
+    commands:
+      - mvn package
+  post_build:
+    commands:
+      - docker build -t $BUCKET_NAME .
+      - docker tag $BUCKET_NAME:latest 467420073914.dkr.ecr.eu-west-1.amazonaws.com/$BUCKET_NAME:latest
+      - docker push 467420073914.dkr.ecr.eu-west-1.amazonaws.com/$BUCKET_NAME:latest
+cache:
+  paths:
+    - /root/.m2/**/*

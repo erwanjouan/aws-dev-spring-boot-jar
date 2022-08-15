@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A Java SpringBoot application deployed with ECS Fargate
+Parameters:
+  ProjectName:
+    Type: String
+  DeploymentName:
+    Type: String
+Resources:
+  ImageRegistry:
+    Description: Docker registry for build artifact
+    Properties:
+      RepositoryName: !Sub '${ProjectName}-${DeploymentName}'
+    Type: AWS::ECS::Repository
