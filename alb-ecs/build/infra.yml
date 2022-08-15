@@ -10,4 +10,4 @@ Resources:
     Description: Docker registry for build artifact
     Properties:
       RepositoryName: !Sub '${ProjectName}-${DeploymentName}'
-    Type: AWS::ECS::Repository
+    Type: AWS::ECR::Repository
