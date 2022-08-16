@@ -13,13 +13,13 @@ phases:
       - aws --version && docker --version && java --version && mvn --version
   build:
     commands:
-      - mvn package
+      - mvn package -Plambda
   post_build:
     commands:
-      - mkdir -p revision # CodeDeploy uses the notion of ApplicationRevision
-      - cp target/*.jar ./app.jar
-      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/app.jar
-      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/app.jar
+      - export ARTIFACT_NAME=app.jar
+      - cp target/${PROJECT_NAME}*.jar ${ARTIFACT_NAME}
+      - aws s3 cp ${ARTIFACT_NAME} s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/${ARTIFACT_NAME}
+      - aws s3 cp ${ARTIFACT_NAME} s3://${PROJECT_DEPLOYMENT_NAME}/latest/${ARTIFACT_NAME}
 cache:
   paths:
     - /root/.m2/**/*
