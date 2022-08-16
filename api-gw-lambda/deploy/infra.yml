@@ -3,9 +3,7 @@ Description: A Java SpringBoot application deployed with Lambda
 Parameters:
   ProjectDeploymentName:
     Type: String
-  GitCommitId:
-    Type: String
-  ArtifactOutputBucket:
+  ProjectVersion:
     Type: String
   ApiGatewayDevStageName:
     Type: String
@@ -55,11 +53,11 @@ Resources:
       Timeout: 60
       MemorySize: 4096 # Java...
       Code:
-        S3Bucket: !Ref ArtifactOutputBucket
-        S3Key: !Sub '${ProjectDeploymentName}/app_${GitCommitId}.jar'
+        S3Bucket: !Ref ProjectDeploymentName
+        S3Key: !Sub '${ProjectVersion}/app.jar'
       Tags:
         - Key: COMMIT_ID
-          Value: !Ref GitCommitId
+          Value: !Ref ProjectVersion
     Type: AWS::Lambda::Function
 
   LambdaFunctionLogGroup:
@@ -81,12 +79,12 @@ Resources:
       Name: !Ref ApiGatewayDevStageName
     Type: AWS::Lambda::Alias
 
-  LambdaProdAlias:
-    Properties:
-      FunctionName: !Ref LambdaFunction
-      FunctionVersion: !GetAtt LambdaVersion.Version
-      Name: !Ref ApiGatewayProdStageName
-    Type: AWS::Lambda::Alias
+  #LambdaProdAlias:
+  #  Properties:
+  #    FunctionName: !Ref LambdaFunction
+  #    FunctionVersion: !GetAtt LambdaVersion.Version
+  #   Name: !Ref ApiGatewayProdStageName
+  #  Type: AWS::Lambda::Alias
 
   ##########################
   # Api Gateway
@@ -145,31 +143,31 @@ Resources:
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
     Type: AWS::Lambda::Permission
 
-  ApiGatewayProdDeployment:
-    Properties:
-      RestApiId: !Ref ApiGateway
-    DependsOn:
-      - "ApiGatewayProxyMethod"
-    Type: AWS::ApiGateway::Deployment
+  #ApiGatewayProdDeployment:
+  #  Properties:
+  #    RestApiId: !Ref ApiGateway
+  #  DependsOn:
+  #    - "ApiGatewayProxyMethod"
+  #  Type: AWS::ApiGateway::Deployment
 
-  ApiGatewayProdStage:
-    Properties:
-      RestApiId: !Ref ApiGateway
-      StageName: !Ref ApiGatewayProdStageName
-      DeploymentId: !Ref ApiGatewayProdDeployment
-      Variables:
-        stage: !Ref ApiGatewayProdStageName
-    DependsOn:
-      - "ApiGatewayProxyMethod"
-    Type: AWS::ApiGateway::Stage
+  #ApiGatewayProdStage:
+  #  Properties:
+  #    RestApiId: !Ref ApiGateway
+  #    StageName: !Ref ApiGatewayProdStageName
+  #    DeploymentId: !Ref ApiGatewayProdDeployment
+  #    Variables:
+  #      stage: !Ref ApiGatewayProdStageName
+  #  DependsOn:
+  #    - "ApiGatewayProxyMethod"
+  #  Type: AWS::ApiGateway::Stage
 
-  ProdPermission:
-    Properties:
-      FunctionName: !Ref LambdaProdAlias
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
-    Type: AWS::Lambda::Permission
+  #ProdPermission:
+  #  Properties:
+  #    FunctionName: !Ref LambdaProdAlias
+  #    Action: lambda:InvokeFunction
+  #    Principal: apigateway.amazonaws.com
+  #    SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
+  #  Type: AWS::Lambda::Permission
 
   ###############
   # CodeDeploy
@@ -197,8 +195,8 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:List*
                 Resource:
-                  - !Sub "arn:aws:s3:::${ArtifactOutputBucket}"
-                  - !Sub "arn:aws:s3:::${ArtifactOutputBucket}/*"
+                  - !Sub "arn:aws:s3:::${ProjectDeploymentName}"
+                  - !Sub "arn:aws:s3:::${ProjectDeploymentName}/*"
       Path: /
     Type: AWS::IAM::Role
 
