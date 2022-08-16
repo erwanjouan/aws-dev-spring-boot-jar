@@ -17,11 +17,9 @@ phases:
   post_build:
     commands:
       - mkdir -p revision # CodeDeploy uses the notion of ApplicationRevision
-      - cp target/*.jar ./revision/app.jar
-      - cp ${DEPLOYMENT_NAME}/deploy/codedeploy/* ./revision
-      - zip -r revision.zip revision
-      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip
-      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/revision.zip
+      - cp target/*.jar ./app.jar
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/app.jar
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/app.jar
 cache:
   paths:
     - /root/.m2/**/*
