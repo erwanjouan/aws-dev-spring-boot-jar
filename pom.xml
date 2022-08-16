@@ -40,6 +40,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- only for AWS/Lambda-->
         <dependency>
             <groupId>com.amazonaws.serverless</groupId>
             <artifactId>aws-serverless-java-container-springboot2</artifactId>
@@ -63,6 +64,7 @@
             </build>
         </profile>
         <profile>
+            <!-- only for AWS/Lambda-->
             <id>lambda</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
