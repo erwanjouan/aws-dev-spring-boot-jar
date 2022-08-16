@@ -115,7 +115,7 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
         Uri: !Sub
-          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}:${!stageVariables.stage}/invocations
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations
           - lambdaArn: !GetAtt LambdaFunction.Arn
     Type: AWS::ApiGateway::Method
 
