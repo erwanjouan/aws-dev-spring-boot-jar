@@ -8,4 +8,4 @@ phases:
         --stack-name ${PROJECT_DEPLOYMENT_NAME}-deploy
         --parameter-overrides 
             ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
-            ImageTag=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+            ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}

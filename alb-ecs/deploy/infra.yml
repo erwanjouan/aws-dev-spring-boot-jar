@@ -3,7 +3,7 @@ Description: A Java SpringBoot application deployed on ECS Fargate behind an ALB
 Parameters:
   ProjectDeploymentName:
     Type: String
-  ImageTag:
+  ProjectVersion:
     Type: String
   ApplicationPort:
     Type: String
@@ -262,7 +262,7 @@ Resources:
         - FARGATE
       ContainerDefinitions:
         - Name: !Ref ProjectDeploymentName
-          Image: !Sub '467420073914.dkr.ecr.eu-west-1.amazonaws.com/${ProjectDeploymentName}:${ImageTag}'
+          Image: !Sub '467420073914.dkr.ecr.eu-west-1.amazonaws.com/${ProjectDeploymentName}:${ProjectVersion}'
           Environment:
             - Name: SERVER_PORT
               Value: !Ref ApplicationPort
