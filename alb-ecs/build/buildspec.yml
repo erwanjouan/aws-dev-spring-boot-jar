@@ -10,10 +10,7 @@ phases:
             ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
   pre_build:
     commands:
-      - aws --version
-      - docker --version
-      - java --version
-      - mvn --version
+      - aws --version && docker --version && java --version && mvn --version
       - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 467420073914.dkr.ecr.eu-west-1.amazonaws.com
   build:
     commands:
