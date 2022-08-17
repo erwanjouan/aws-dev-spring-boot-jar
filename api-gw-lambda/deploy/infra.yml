@@ -13,9 +13,6 @@ Parameters:
     Type: String
     AllowedPattern: "[a-z0-9]+"
     Default: prod
-  ApiGatewayHTTPMethod:
-    Type: String
-    Default: ANY
   #ResourceEndpoint:
   #  Type: String
   #  Default: api
@@ -107,7 +104,7 @@ Resources:
   ApiGatewayProxyMethod:
     Properties:
       AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
+      HttpMethod: ANY
       ResourceId: !Ref ProxyResource
       RestApiId: !Ref ApiGateway
       Integration:
@@ -123,6 +120,7 @@ Resources:
   ApiGatewayDeployment:
     Properties:
       RestApiId: !Ref ApiGateway
+      StageName: !Ref ApiGatewayDevStageName
     DependsOn:
       - "ApiGatewayProxyMethod"
     Type: AWS::ApiGateway::Deployment
