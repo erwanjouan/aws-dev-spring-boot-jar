@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: A Java SpringBoot application deployed with ApiGateway/Lambda
+Description: A Java SpringBoot application built for ApiGateway/Lambda
 Parameters:
   ProjectDeploymentName:
     Type: String
