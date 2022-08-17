@@ -50,7 +50,6 @@ Resources:
       MemorySize: 4096 # Java...
       Code:
         S3Bucket: !Ref ProjectDeploymentName
-        #S3Key: !Sub '${ProjectVersion}/app.jar'
         S3Key: latest/app.jar
       Tags:
         - Key: COMMIT_ID
@@ -97,7 +96,6 @@ Resources:
     Properties:
       ParentId: !GetAtt ApiGateway.RootResourceId
       RestApiId: !Ref ApiGateway
-      #PathPart: !Ref ResourceEndpoint
       PathPart: '{proxy+}'
     Type: AWS::ApiGateway::Resource
 
@@ -127,39 +125,11 @@ Resources:
 
   Permission:
     Properties:
-      #FunctionName: !Ref LambdaDevAlias
       FunctionName: !GetAtt LambdaFunction.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/*
-      #SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
     Type: AWS::Lambda::Permission
-
-  #ApiGatewayProdDeployment:
-  #  Properties:
-  #    RestApiId: !Ref ApiGateway
-  #  DependsOn:
-  #    - "ApiGatewayProxyMethod"
-  #  Type: AWS::ApiGateway::Deployment
-
-  #ApiGatewayProdStage:
-  #  Properties:
-  #    RestApiId: !Ref ApiGateway
-  #    StageName: !Ref ApiGatewayProdStageName
-  #    DeploymentId: !Ref ApiGatewayProdDeployment
-  #    Variables:
-  #      stage: !Ref ApiGatewayProdStageName
-  #  DependsOn:
-  #    - "ApiGatewayProxyMethod"
-  #  Type: AWS::ApiGateway::Stage
-
-  #ProdPermission:
-  #  Properties:
-  #    FunctionName: !Ref LambdaProdAlias
-  #    Action: lambda:InvokeFunction
-  #    Principal: apigateway.amazonaws.com
-  #    SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
-  #  Type: AWS::Lambda::Permission
 
   ###############
   # CodeDeploy
@@ -212,6 +182,5 @@ Resources:
 Outputs:
   ApiGatewayInvokeURL:
     Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
-
   LambdaArn:
     Value: !GetAtt LambdaFunction.Arn
