@@ -16,9 +16,9 @@ Parameters:
   ApiGatewayHTTPMethod:
     Type: String
     Default: ANY
-  ResourceEndpoint:
-    Type: String
-    Default: api
+  #ResourceEndpoint:
+  #  Type: String
+  #  Default: api
   DeploymentConfigName:
     Type: String
     Default: CodeDeployDefault.LambdaAllAtOnce
@@ -100,7 +100,8 @@ Resources:
     Properties:
       ParentId: !GetAtt ApiGateway.RootResourceId
       RestApiId: !Ref ApiGateway
-      PathPart: !Ref ResourceEndpoint
+      #PathPart: !Ref ResourceEndpoint
+      PathPart: '{proxy+}'
     Type: AWS::ApiGateway::Resource
 
   ApiGatewayProxyMethod:
@@ -141,7 +142,8 @@ Resources:
       FunctionName: !GetAtt LambdaFunction.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/*
+      #SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/${ResourceEndpoint}
     Type: AWS::Lambda::Permission
 
   #ApiGatewayProdDeployment:
@@ -220,7 +222,8 @@ Resources:
 
 Outputs:
   ApiGatewayInvokeURL:
-    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
+    #Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/
 
   LambdaArn:
     Value: !GetAtt LambdaFunction.Arn
