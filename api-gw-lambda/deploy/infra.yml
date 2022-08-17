@@ -13,9 +13,8 @@ Parameters:
     Type: String
     AllowedPattern: "[a-z0-9]+"
     Default: prod
-  #ResourceEndpoint:
-  #  Type: String
-  #  Default: api
+  ResourceEndpoint:
+    Type: String
   DeploymentConfigName:
     Type: String
     Default: CodeDeployDefault.LambdaAllAtOnce
@@ -51,7 +50,8 @@ Resources:
       MemorySize: 4096 # Java...
       Code:
         S3Bucket: !Ref ProjectDeploymentName
-        S3Key: !Sub '${ProjectVersion}/app.jar'
+        #S3Key: !Sub '${ProjectVersion}/app.jar'
+        S3Key: latest/app.jar'
       Tags:
         - Key: COMMIT_ID
           Value: !Ref ProjectVersion
@@ -220,8 +220,7 @@ Resources:
 
 Outputs:
   ApiGatewayInvokeURL:
-    #Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
-    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
 
   LambdaArn:
     Value: !GetAtt LambdaFunction.Arn

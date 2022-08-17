@@ -9,3 +9,4 @@ phases:
         --parameter-overrides 
             ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
             ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+            ResourceEndpoint=api
