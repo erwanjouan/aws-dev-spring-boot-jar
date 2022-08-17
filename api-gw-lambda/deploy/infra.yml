@@ -120,19 +120,10 @@ Resources:
   ApiGatewayDeployment:
     Properties:
       RestApiId: !Ref ApiGateway
-      StageName: !Ref ApiGatewayDevStageName
+      StageName: !Ref ApiGatewayDevStageName # creates a stage, no need for AWS::ApiGateway::Stage object
     DependsOn:
       - "ApiGatewayProxyMethod"
     Type: AWS::ApiGateway::Deployment
-
-  ApiGatewayStage:
-    Properties:
-      RestApiId: !Ref ApiGateway
-      DeploymentId: !Ref ApiGatewayDeployment
-      StageName: !Ref ApiGatewayDevStageName
-      Variables:
-        stage: !Ref ApiGatewayDevStageName
-    Type: AWS::ApiGateway::Stage
 
   Permission:
     Properties:
