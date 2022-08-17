@@ -75,13 +75,6 @@ Resources:
       Name: !Ref ApiGatewayDevStageName
     Type: AWS::Lambda::Alias
 
-  #LambdaProdAlias:
-  #  Properties:
-  #    FunctionName: !Ref LambdaFunction
-  #    FunctionVersion: !GetAtt LambdaVersion.Version
-  #   Name: !Ref ApiGatewayProdStageName
-  #  Type: AWS::Lambda::Alias
-
   ##########################
   # Api Gateway
   ##########################
