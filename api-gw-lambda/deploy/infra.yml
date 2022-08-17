@@ -51,7 +51,7 @@ Resources:
       Code:
         S3Bucket: !Ref ProjectDeploymentName
         #S3Key: !Sub '${ProjectVersion}/app.jar'
-        S3Key: latest/app.jar'
+        S3Key: latest/app.jar
       Tags:
         - Key: COMMIT_ID
           Value: !Ref ProjectVersion
