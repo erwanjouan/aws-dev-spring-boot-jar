@@ -1,0 +1,64 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: A Java SpringBoot application (jar) deployed with Elastic Beanstalk
+Parameters:
+  ProjectDeploymentName:
+    Type: String
+
+Resources:
+
+  SpringBootApplication:
+    Properties:
+      ApplicationName: !Ref ProjectDeploymentName
+      Description: Spring boot and elastic beanstalk
+    Type: AWS::ElasticBeanstalk::Application
+
+  SpringBootApplicationVersion:
+    Properties:
+      ApplicationName: !Ref SpringBootApplication
+      SourceBundle:
+        S3Bucket: !Ref ProjectDeploymentName
+        S3Key: !Sub '${ProjectVersion}/app.jar'
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+
+  SpringBootBeanStalkConfigurationTemplate:
+    Properties:
+      ApplicationName: !Ref SpringBootApplication
+      Description: A configurable deployment of Spring Boot application
+      OptionSettings:
+        - Namespace: aws:autoscaling:asg
+          OptionName: MinSize
+          Value: 2
+        - Namespace: aws:autoscaling:asg
+          OptionName: MaxSize
+          Value: 4
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: EnvironmentType
+          Value: LoadBalanced
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: !Ref BackendInstanceProfile
+        - Namespace: aws:elb:listener:80
+          OptionName: InstancePort
+          Value: 8080
+        - Namespace: aws:elasticbeanstalk:application
+          OptionName: Application Healthcheck URL
+          Value: TCP:8080
+      SolutionStackName: 64bit Amazon Linux 2 v3.2.15 running Corretto 11
+    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
+
+  SpringBootBeanstalkEnvironment:
+    Properties:
+      ApplicationName: !Ref SpringBootApplication
+      EnvironmentName: !Ref SpringBootApplication
+      TemplateName: !Ref SpringBootBeanStalkConfigurationTemplate
+      VersionLabel: !Ref SpringBootApplicationVersion
+    Type: AWS::ElasticBeanstalk::Environment
+
+  BackendInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub '${MavenProjectName}-eb-instance-profile'
+      Path: /
+      Roles:
+        - aws-elasticbeanstalk-ec2-role
