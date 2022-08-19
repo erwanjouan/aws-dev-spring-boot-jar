@@ -58,7 +58,7 @@ Resources:
   BackendInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Sub '${MavenProjectName}-eb-instance-profile'
+      InstanceProfileName: !Sub '${ProjectDeploymentName}-instance-profile'
       Path: /
       Roles:
         - aws-elasticbeanstalk-ec2-role
