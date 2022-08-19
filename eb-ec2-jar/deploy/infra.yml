@@ -44,7 +44,7 @@ Resources:
           Value: 8080
         - Namespace: aws:elasticbeanstalk:application
           OptionName: Application Healthcheck URL
-          Value: TCP:8080
+          Value:  HTTP:8080/actuator/health
       SolutionStackName: 64bit Amazon Linux 2 v3.2.15 running Corretto 11
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
 
