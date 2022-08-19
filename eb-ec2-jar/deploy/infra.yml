@@ -4,7 +4,8 @@ Description: A Java SpringBoot application (jar) deployed with Elastic Beanstalk
 Parameters:
   ProjectDeploymentName:
     Type: String
-
+  ProjectVersion:
+    Type: String
 Resources:
 
   SpringBootApplication:
