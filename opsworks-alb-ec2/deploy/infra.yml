@@ -232,14 +232,14 @@ Resources:
       Name: !Ref ProjectName
       AppSource:
         Type: s3
-        Url: !Sub s3://${ProjectDeploymentName}/${ProjectVersion}/app.jar
+        Url: !Sub https://${ProjectDeploymentName}.s3.eu-west-1.amazonaws.com/${ProjectVersion}/app.jar
       StackId: !Ref OpsworkStack
       Type: other
     Type: AWS::OpsWorks::App
 
   OpsWorksInstance:
     Properties:
-      InstanceType: t2.micro
+      InstanceType: t2.medium
       SshKeyName: k2
       RootDeviceType: ebs
       LayerIds: [ !Ref OpsWorksLayer ]
