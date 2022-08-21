@@ -7,5 +7,6 @@ phases:
         --template-file ${DEPLOYMENT_NAME}/deploy/infra.yml
         --stack-name ${PROJECT_DEPLOYMENT_NAME}-deploy
         --parameter-overrides 
+            ProjectName=${PROJECT_NAME}
             ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
             ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}

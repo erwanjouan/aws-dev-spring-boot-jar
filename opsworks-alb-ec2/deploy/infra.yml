@@ -1,65 +1,259 @@
-
-AWSTemplateFormatVersion: 2010-09-09
-Description: A Java SpringBoot application (jar) deployed with Elastic Beanstalk
+AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
+  ProjectName:
+    Type: String
   ProjectDeploymentName:
     Type: String
   ProjectVersion:
     Type: String
+
 Resources:
 
-  SpringBootApplication:
-    Properties:
-      ApplicationName: !Ref ProjectDeploymentName
-      Description: Spring boot and elastic beanstalk
-    Type: AWS::ElasticBeanstalk::Application
+  ##########################
+  # Networking
+  ##########################
 
-  SpringBootApplicationVersion:
+  VPC:
+    Type: AWS::EC2::VPC
     Properties:
-      ApplicationName: !Ref SpringBootApplication
-      SourceBundle:
-        S3Bucket: !Ref ProjectDeploymentName
-        S3Key: !Sub '${ProjectVersion}/app.jar'
-    Type: AWS::ElasticBeanstalk::ApplicationVersion
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
 
-  SpringBootBeanStalkConfigurationTemplate:
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
     Properties:
-      ApplicationName: !Ref SpringBootApplication
-      Description: A configurable deployment of Spring Boot application
-      OptionSettings:
-        - Namespace: aws:autoscaling:asg
-          OptionName: MinSize
-          Value: 2
-        - Namespace: aws:autoscaling:asg
-          OptionName: MaxSize
-          Value: 4
-        - Namespace: aws:elasticbeanstalk:environment
-          OptionName: EnvironmentType
-          Value: LoadBalanced
-        - Namespace: aws:autoscaling:launchconfiguration
-          OptionName: IamInstanceProfile
-          Value: !Ref BackendInstanceProfile
-        - Namespace: aws:elb:listener:80
-          OptionName: InstancePort
-          Value: 8080
-        - Namespace: aws:elasticbeanstalk:application
-          OptionName: Application Healthcheck URL
-          Value:  HTTP:8080/actuator/health
-      SolutionStackName: 64bit Amazon Linux 2 v3.2.15 running Corretto 11
-    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
+      CidrBlock: 10.0.3.0/24
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
 
-  SpringBootBeanstalkEnvironment:
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
     Properties:
-      ApplicationName: !Ref SpringBootApplication
-      EnvironmentName: !Ref SpringBootApplication
-      TemplateName: !Ref SpringBootBeanStalkConfigurationTemplate
-      VersionLabel: !Ref SpringBootApplicationVersion
-    Type: AWS::ElasticBeanstalk::Environment
+      CidrBlock: 10.0.4.0/24
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
 
-  BackendInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
     Properties:
-      InstanceProfileName: !Sub '${ProjectDeploymentName}-instance-profile'
-      Path: /
+      CidrBlock: 10.0.0.0/24
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      MapPublicIpOnLaunch: false
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  GatewayToInternet:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: NatPublicIP
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      AllocationId: !GetAtt NatPublicIP.AllocationId
+
+  NatPublicIP:
+    Type: AWS::EC2::EIP
+    DependsOn: VPC
+    Properties:
+      Domain: vpc
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      NatGatewayId: !Ref NatGateway
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  ##########################
+  # Opsworks Stacks
+  ##########################
+
+  ec2Role:
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Opswork EC2 role to download artif and register to stack
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Sid: S3Permission
+                Effect: Allow
+                Action:
+                  - s3:GetObject*
+                  - opsworks:RegisterInstance
+                  - opsworks:DeregisterInstance
+                  - opsworks:DescribeInstances
+                Resource: "*"
+            Version: '2012-10-17'
+          PolicyName: s3Policy
+    Type: AWS::IAM::Role
+  
+  InstanceProfile:
+    Properties:
       Roles:
-        - aws-elasticbeanstalk-ec2-role
+      - !Ref ec2Role
+    Type: AWS::IAM::InstanceProfile
+
+  ServiceRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - opsworks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Opswork service role
+      Policies:
+        - PolicyName: opsworkServicePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:GetMetricStatistics
+                  - ec2:*
+                  - ecs:*
+                  - elasticloadbalancing:*
+                  - iam:PassRole
+                  - iam:GetRolePolicy
+                  - iam:ListInstanceProfiles
+                  - iam:ListRoles
+                  - iam:ListUsers
+                  - rds:*
+                Resource: "*"
+    Type: AWS::IAM::Role
+
+  OpsworkStack:
+    Properties:
+      DefaultInstanceProfileArn: !GetAtt InstanceProfile.Arn
+      DefaultSubnetId: !Ref PublicSubnet1
+      Name: !Ref ProjectName
+      ServiceRoleArn: !GetAtt ServiceRole.Arn
+      VpcId: !Ref VPC
+      DefaultOs: Amazon Linux 2
+      ConfigurationManager:
+        Name: Chef
+        Version: 12
+      UseCustomCookbooks: True
+      CustomCookbooksSource:
+        Type: git
+        Url: https://github.com/goblin23/chef-spring-boot
+    Type: AWS::OpsWorks::Stack
+
+  OpsWorksLayer:
+    Properties:
+      AutoAssignElasticIps: true
+      AutoAssignPublicIps: true
+      EnableAutoHealing: false
+      Name: !Ref ProjectName
+      Shortname: !Ref ProjectName
+      CustomSecurityGroupIds:
+        - !GetAtt OpsWorksInstanceSecurityGroup.GroupId
+      CustomRecipes:
+        Deploy:
+          - spring_boot_web_app::install
+      StackId: !Ref OpsworkStack
+      Type: custom
+    Type: AWS::OpsWorks::Layer
+
+  OpsWorksApp:
+    Properties:
+      Name: !Ref ProjectName
+      AppSource:
+        Type: s3
+        Url: !Sub s3://${ProjectDeploymentName}/${ProjectVersion}/app.jar
+      StackId: !Ref OpsworkStack
+      Type: other
+    Type: AWS::OpsWorks::App
+
+  OpsWorksInstance:
+    Properties:
+      InstanceType: t2.micro
+      SshKeyName: k2
+      RootDeviceType: ebs
+      LayerIds: [ !Ref OpsWorksLayer ]
+      StackId: !Ref OpsworkStack
+      VirtualizationType: hvm
+    Type: AWS::OpsWorks::Instance
+
+  OpsWorksInstanceSecurityGroup:
+    Properties:
+      GroupDescription: Allows access to EC2 from Internet
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+    Type: AWS::EC2::SecurityGroup
