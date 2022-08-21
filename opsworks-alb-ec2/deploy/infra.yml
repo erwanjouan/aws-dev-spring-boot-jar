@@ -232,7 +232,7 @@ Resources:
       Name: !Ref ProjectName
       AppSource:
         Type: s3
-        Url: !Sub https://${ProjectDeploymentName}.s3.eu-west-1.amazonaws.com/${ProjectVersion}/app.jar
+        Url: !Sub https://${ProjectDeploymentName}.s3.${AWS::Region}.amazonaws.com/${ProjectVersion}/app.jar
       StackId: !Ref OpsworkStack
       Type: other
     Type: AWS::OpsWorks::App
