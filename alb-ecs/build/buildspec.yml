@@ -1,0 +1,26 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy
+        --capabilities CAPABILITY_NAMED_IAM
+        --template-file ${DEPLOYMENT_NAME}/build/infra.yml
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}-build
+        --parameter-overrides
+            ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
+  pre_build:
+    commands:
+      - aws --version && docker --version && java --version && mvn --version
+      - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 467420073914.dkr.ecr.eu-west-1.amazonaws.com
+  build:
+    commands:
+      - mvn package
+  post_build:
+    commands:
+      - docker build -f ${DEPLOYMENT_NAME}/build/Dockerfile -t ${PROJECT_DEPLOYMENT_NAME} .
+      - docker tag ${PROJECT_DEPLOYMENT_NAME}:latest 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}:latest
+      - docker tag ${PROJECT_DEPLOYMENT_NAME}:latest 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}:${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      - docker push --all-tags 467420073914.dkr.ecr.eu-west-1.amazonaws.com/${PROJECT_DEPLOYMENT_NAME}
+cache:
+  paths:
+    - /root/.m2/**/*

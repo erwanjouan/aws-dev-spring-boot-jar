@@ -1,0 +1,27 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy
+        --capabilities CAPABILITY_NAMED_IAM
+        --template-file ${DEPLOYMENT_NAME}/build/infra.yml
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}-build
+        --parameter-overrides
+            ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
+  pre_build:
+    commands:
+      - aws --version && docker --version && java --version && mvn --version
+  build:
+    commands:
+      - mvn package
+  post_build:
+    commands:
+      - mkdir -p revision # CodeDeploy uses the notion of ApplicationRevision
+      - cp target/*.jar ./revision/app.jar
+      - cp ${PROJECT_DEPLOYMENT_NAME}/deploy/codedeploy/* ./revision
+      - zip -r revision.zip revision
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/revision.zip
+      - aws s3 cp revision.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/revision.zip
+cache:
+  paths:
+    - /root/.m2/**/*

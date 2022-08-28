@@ -1,0 +1,179 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A Java SpringBoot application deployed with APIGateway/Lambda
+Parameters:
+  ProjectDeploymentName:
+    Type: String
+  ProjectVersion:
+    Type: String
+  ApiGatewayDevStageName:
+    Type: String
+    AllowedPattern: "[a-z0-9]+"
+    Default: dev
+  ApiGatewayProdStageName:
+    Type: String
+    AllowedPattern: "[a-z0-9]+"
+    Default: prod
+  ResourceEndpoint:
+    Type: String
+  DeploymentConfigName:
+    Type: String
+    Default: CodeDeployDefault.LambdaAllAtOnce
+
+Resources:
+
+  ##########################
+  # Lambda
+  ##########################
+
+  LambdaExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Type: AWS::IAM::Role
+
+  LambdaFunction:
+    Properties:
+      FunctionName: !Ref ProjectDeploymentName
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Handler: bluegreen.StreamLambdaHandler::handleRequest # code dependent
+      Runtime: java11
+      Timeout: 60
+      MemorySize: 4096 # Java...
+      Code:
+        S3Bucket: !Ref ProjectDeploymentName
+        S3Key: latest/app.jar
+      Tags:
+        - Key: COMMIT_ID
+          Value: !Ref ProjectVersion
+    Type: AWS::Lambda::Function
+
+  LambdaFunctionLogGroup:
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ProjectDeploymentName}
+      RetentionInDays: 90
+    Type: AWS::Logs::LogGroup
+
+  LambdaVersion:
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Description: Function versionning
+    Type: AWS::Lambda::Version
+
+  LambdaDevAlias:
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      FunctionVersion: !GetAtt LambdaVersion.Version
+      Name: !Ref ApiGatewayDevStageName
+    Type: AWS::Lambda::Alias
+
+  ##########################
+  # Api Gateway
+  ##########################
+
+  ApiGateway:
+    Properties:
+      Name: !Ref ProjectDeploymentName
+      Description: !Ref ProjectDeploymentName
+    Type: AWS::ApiGateway::RestApi
+
+  ProxyResource:
+    Properties:
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      RestApiId: !Ref ApiGateway
+      PathPart: '{proxy+}'
+    Type: AWS::ApiGateway::Resource
+
+  ApiGatewayProxyMethod:
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: ANY
+      ResourceId: !Ref ProxyResource
+      RestApiId: !Ref ApiGateway
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        IntegrationResponses:
+          - StatusCode: 200
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations
+          - lambdaArn: !GetAtt LambdaFunction.Arn
+    Type: AWS::ApiGateway::Method
+
+  ApiGatewayDeployment:
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: !Ref ApiGatewayDevStageName # creates a stage, no need for AWS::ApiGateway::Stage object
+    DependsOn:
+      - "ApiGatewayProxyMethod"
+    Type: AWS::ApiGateway::Deployment
+
+  Permission:
+    Properties:
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/*
+    Type: AWS::Lambda::Permission
+
+  ###############
+  # CodeDeploy
+  ###############
+
+  CodeDeployer:
+    Properties:
+      Description: Provides CodeDeploy service access to expand tags and interact with Auto Scaling on your behalf.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: codedeploy.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      Policies:
+        - PolicyName: allow-to-access-to-S3
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:List*
+                Resource:
+                  - !Sub "arn:aws:s3:::${ProjectDeploymentName}"
+                  - !Sub "arn:aws:s3:::${ProjectDeploymentName}/*"
+      Path: /
+    Type: AWS::IAM::Role
+
+  CodeDeployApplication:
+    Properties:
+      ApplicationName: !Ref ProjectDeploymentName
+      ComputePlatform: Lambda
+    Type: AWS::CodeDeploy::Application
+
+  CodeDeployDeploymentGroup:
+    Properties:
+      ApplicationName: !Ref ProjectDeploymentName
+      ServiceRoleArn: !GetAtt CodeDeployer.Arn
+      DeploymentConfigName: !Ref DeploymentConfigName
+      DeploymentGroupName: !Ref ProjectDeploymentName
+      DeploymentStyle:
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+        DeploymentType: BLUE_GREEN
+    Type: AWS::CodeDeploy::DeploymentGroup
+
+Outputs:
+  ApiGatewayInvokeURL:
+    Value: !Sub https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayDevStageName}/${ResourceEndpoint}
+  LambdaArn:
+    Value: !GetAtt LambdaFunction.Arn

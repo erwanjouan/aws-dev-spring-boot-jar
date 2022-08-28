@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A Java SpringBoot application deployed with Elastic BeanStalk running EC2/Docker
+Parameters:
+  ProjectDeploymentName:
+    Type: String
+Resources:
+  ImageRegistry:
+    Description: Docker registry for build artifact
+    Properties:
+      RepositoryName: !Ref ProjectDeploymentName
+    Type: AWS::ECR::Repository
+  ArtifactOutputBucket:
+    Description: Bucket for Docker configuration file
+    Properties:
+      BucketName: !Ref ProjectDeploymentName
+    Type: AWS::S3::Bucket

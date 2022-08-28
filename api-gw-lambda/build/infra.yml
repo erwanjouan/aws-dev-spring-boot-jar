@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A Java SpringBoot application built for ApiGateway/Lambda
+Parameters:
+  ProjectDeploymentName:
+    Type: String
+Resources:
+  ArtifactOutputBucket:
+    Description: Bucket for build output
+    Properties:
+      BucketName: !Ref ProjectDeploymentName
+    Type: AWS::S3::Bucket

@@ -1,0 +1,25 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy
+        --capabilities CAPABILITY_NAMED_IAM
+        --template-file ${DEPLOYMENT_NAME}/build/infra.yml
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}-build
+        --parameter-overrides
+            ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
+  pre_build:
+    commands:
+      - aws --version && docker --version && java --version && mvn --version
+  build:
+    commands:
+      - mvn package -Plambda
+  post_build:
+    commands:
+      - export ARTIFACT_NAME=app.jar
+      - cp target/${PROJECT_NAME}*.jar ${ARTIFACT_NAME}
+      - aws s3 cp ${ARTIFACT_NAME} s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/${ARTIFACT_NAME}
+      - aws s3 cp ${ARTIFACT_NAME} s3://${PROJECT_DEPLOYMENT_NAME}/latest/${ARTIFACT_NAME}
+cache:
+  paths:
+    - /root/.m2/**/*
