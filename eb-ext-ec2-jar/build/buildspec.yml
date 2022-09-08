@@ -1,0 +1,29 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - aws cloudformation deploy
+        --capabilities CAPABILITY_NAMED_IAM
+        --template-file ${DEPLOYMENT_NAME}/build/infra.yml
+        --stack-name ${PROJECT_DEPLOYMENT_NAME}-build
+        --parameter-overrides
+            ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
+  pre_build:
+    commands:
+      - aws --version && docker --version && java --version && mvn --version
+  build:
+    commands:
+      - mvn package
+  post_build:
+    commands:
+      - export SOURCE_BUNDLE_FOLDER=source_bundle
+      - mkdir ${SOURCE_BUNDLE_FOLDER}
+      - cp target/*.jar ${SOURCE_BUNDLE_FOLDER}/app.jar
+      - cp -r ${DEPLOYMENT_NAME}/build/.ebextensions ${SOURCE_BUNDLE_FOLDER}
+      - cd ${SOURCE_BUNDLE_FOLDER}
+      - zip -r ${SOURCE_BUNDLE_FOLDER}.zip .ebextensions app.jar
+      - aws s3 cp ${SOURCE_BUNDLE_FOLDER}.zip s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/${SOURCE_BUNDLE_FOLDER}.zip
+      - aws s3 cp ${SOURCE_BUNDLE_FOLDER}.zip s3://${PROJECT_DEPLOYMENT_NAME}/latest/${SOURCE_BUNDLE_FOLDER}.zip
+cache:
+  paths:
+    - /root/.m2/**/*
