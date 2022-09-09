@@ -50,7 +50,7 @@ Resources:
       MemorySize: 4096 # Java...
       Code:
         S3Bucket: !Ref ProjectDeploymentName
-        S3Key: '${ProjectVersion}/app.jar'
+        S3Key: !Sub '${ProjectVersion}/app.jar'
       Tags:
         - Key: COMMIT_ID
           Value: !Ref ProjectVersion
