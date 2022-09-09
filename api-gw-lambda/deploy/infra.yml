@@ -50,7 +50,7 @@ Resources:
       MemorySize: 4096 # Java...
       Code:
         S3Bucket: !Ref ProjectDeploymentName
-        S3Key: latest/app.jar
+        S3Key: '${ProjectVersion}/app.jar'
       Tags:
         - Key: COMMIT_ID
           Value: !Ref ProjectVersion
@@ -62,18 +62,18 @@ Resources:
       RetentionInDays: 90
     Type: AWS::Logs::LogGroup
 
-  LambdaVersion:
-    Properties:
-      FunctionName: !Ref LambdaFunction
-      Description: Function versionning
-    Type: AWS::Lambda::Version
+  #LambdaVersion:
+  #  Properties:
+  #    FunctionName: !Ref LambdaFunction
+  #    Description: Function versionning
+  #  Type: AWS::Lambda::Version
 
-  LambdaDevAlias:
-    Properties:
-      FunctionName: !Ref LambdaFunction
-      FunctionVersion: !GetAtt LambdaVersion.Version
-      Name: !Ref ApiGatewayDevStageName
-    Type: AWS::Lambda::Alias
+  #LambdaDevAlias:
+  #  Properties:
+  #    FunctionName: !Ref LambdaFunction
+  #    FunctionVersion: !GetAtt LambdaVersion.Version
+  #    Name: !Ref ApiGatewayDevStageName
+  #  Type: AWS::Lambda::Alias
 
   ##########################
   # Api Gateway
