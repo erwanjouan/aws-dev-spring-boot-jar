@@ -12,5 +12,16 @@ phases:
             ResourceEndpoint=api
   post_build:
     commands:
-      - FUNCTION_VERSION=$(aws lambda publish-version --function-name ${PROJECT_DEPLOYMENT_NAME} --query "Version")
-          && aws lambda create-alias --function-name ${PROJECT_DEPLOYMENT_NAME} --name alias --function-version ${FUNCTION_VERSION} || true
+      - export FUNCTION_ALIAS=alias
+      - export TARGET_FUNCTION_VERSION=$(aws lambda publish-version
+                              --function-name ${PROJECT_DEPLOYMENT_NAME}
+                              --query "Version")
+          && aws lambda create-alias
+                  --function-name ${PROJECT_DEPLOYMENT_NAME}
+                  --name ${FUNCTION_ALIAS}
+                  --function-version ${TARGET_FUNCTION_VERSION}
+          || true
+      - export CURRENT_FUNCTION_VERSION=$((${TARGET_FUNCTION_VERSION}-1))
+      - envsubst < ${DEPLOYMENT_NAME}/deploy/appspec.yml > appspec.yml
+      - aws s3 cp appspec.yml s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/appspec.yml
+      - aws s3 cp appspec.yml s3://${PROJECT_DEPLOYMENT_NAME}/latest/appspec.yml
