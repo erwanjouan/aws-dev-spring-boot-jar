@@ -18,6 +18,8 @@ Parameters:
   DeploymentConfigName:
     Type: String
     Default: CodeDeployDefault.LambdaAllAtOnce
+  LambdaAlias:
+    Type: String
 
 Resources:
 
@@ -91,17 +93,25 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
         Uri: !Sub
-          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}:${!stageVariables.stage}/invocations
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}:${!stageVariables.lambdaAlias}/invocations
           - lambdaArn: !GetAtt LambdaFunction.Arn
     Type: AWS::ApiGateway::Method
 
   ApiGatewayDeployment:
     Properties:
       RestApiId: !Ref ApiGateway
-      StageName: !Ref ApiGatewayDevStageName # creates a stage, no need for AWS::ApiGateway::Stage object
     DependsOn:
       - "ApiGatewayProxyMethod"
     Type: AWS::ApiGateway::Deployment
+
+  ApiGatewayStage:
+    Properties:
+      RestApiId: !Ref ApiGateway
+      DeploymentId: !Ref ApiGatewayDeployment
+      StageName: !Ref ApiGatewayDevStageName
+      Variables:
+        lambdaAlias: !Ref LambdaAlias
+    Type: AWS::ApiGateway::Stage
 
   Permission:
     Properties:
