@@ -62,19 +62,6 @@ Resources:
       RetentionInDays: 90
     Type: AWS::Logs::LogGroup
 
-  #LambdaVersion:
-  #  Properties:
-  #    FunctionName: !Ref LambdaFunction
-  #    Description: Function versionning
-  #  Type: AWS::Lambda::Version
-
-  #LambdaDevAlias:
-  #  Properties:
-  #    FunctionName: !Ref LambdaFunction
-  #    FunctionVersion: !GetAtt LambdaVersion.Version
-  #    Name: !Ref ApiGatewayDevStageName
-  #  Type: AWS::Lambda::Alias
-
   ##########################
   # Api Gateway
   ##########################
@@ -140,6 +127,7 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForLambda
       Policies:
         - PolicyName: allow-to-access-to-S3
           PolicyDocument:
