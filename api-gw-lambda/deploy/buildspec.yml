@@ -24,5 +24,6 @@ phases:
           || true
       - export CURRENT_FUNCTION_VERSION=$((${TARGET_FUNCTION_VERSION}-1))
       - envsubst < ${DEPLOYMENT_NAME}/deploy/appspec.yml > appspec.yml
+      - cat appspec.yml
       - aws s3 cp appspec.yml s3://${PROJECT_DEPLOYMENT_NAME}/${CODEBUILD_RESOLVED_SOURCE_VERSION}/appspec.yml
       - aws s3 cp appspec.yml s3://${PROJECT_DEPLOYMENT_NAME}/latest/appspec.yml
