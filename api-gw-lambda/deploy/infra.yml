@@ -9,10 +9,6 @@ Parameters:
     Type: String
     AllowedPattern: "[a-z0-9]+"
     Default: dev
-  ApiGatewayProdStageName:
-    Type: String
-    AllowedPattern: "[a-z0-9]+"
-    Default: prod
   ResourceEndpoint:
     Type: String
   DeploymentConfigName:
