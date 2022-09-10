@@ -15,7 +15,8 @@ phases:
       - export FUNCTION_ALIAS=alias
       - export TARGET_FUNCTION_VERSION=$(aws lambda publish-version
                               --function-name ${PROJECT_DEPLOYMENT_NAME}
-                              --query "Version")
+                              --query "Version"
+                              --output text)
           && aws lambda create-alias
                   --function-name ${PROJECT_DEPLOYMENT_NAME}
                   --name ${FUNCTION_ALIAS}
