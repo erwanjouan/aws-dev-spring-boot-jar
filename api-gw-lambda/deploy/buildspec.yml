@@ -10,3 +10,7 @@ phases:
             ProjectDeploymentName=${PROJECT_DEPLOYMENT_NAME}
             ProjectVersion=${CODEBUILD_RESOLVED_SOURCE_VERSION}
             ResourceEndpoint=api
+  post_build:
+    commands:
+      - FUNCTION_VERSION=$(aws lambda publish-version --function-name ${PROJECT_DEPLOYMENT_NAME} --query "Version")
+          && aws lambda create-alias --function-name ${PROJECT_DEPLOYMENT_NAME} --name alias --function-version ${FUNCTION_VERSION} || true
