@@ -111,7 +111,7 @@ Resources:
 
   Permission:
     Properties:
-      FunctionName: !GetAtt LambdaFunction.Arn
+      FunctionName: !Sub '${LambdaFunction.Arn}:${LambdaAlias}'
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/*
