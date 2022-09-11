@@ -15,7 +15,7 @@ phases:
   post_build:
     commands:
       - export TARGET_FUNCTION_VERSION=$(aws lambda list-versions-by-function --function-name ${PROJECT_DEPLOYMENT_NAME}
-          --no-paginate --query "max_by(Versions, &to_number(to_number(Version) || '0'))")
+          --no-paginate --query "max_by(Versions, &to_number(to_number(Version) || '0')).Version" --output text)
       - export CURRENT_FUNCTION_VERSION=$((${TARGET_FUNCTION_VERSION}-1))
       - envsubst < ${DEPLOYMENT_NAME}/deploy/appspec.yml > appspec.yml
       - cat appspec.yml
