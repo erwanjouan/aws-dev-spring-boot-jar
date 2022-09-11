@@ -70,7 +70,6 @@ Resources:
   LambdaVersion:
     Properties:
       FunctionName: !Ref LambdaFunction
-      #Description: !Ref ProjectVersion
     Type: AWS::Lambda::Version
 
   ##########################
