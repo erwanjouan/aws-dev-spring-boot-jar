@@ -63,7 +63,7 @@ Resources:
   LambdaDevAlias:
     Properties:
       FunctionName: !Ref LambdaFunction
-      FunctionVersion: !Ref LambdaVersion
+      FunctionVersion: !GetAtt LambdaVersion.Version
       Name: !Ref LambdaAlias
     Type: AWS::Lambda::Alias
 
