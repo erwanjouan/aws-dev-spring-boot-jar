@@ -71,8 +71,6 @@ Resources:
     Properties:
       FunctionName: !Ref LambdaFunction
       Description: !Ref ProjectVersion
-    DependsOn:
-      - LambdaDevAlias
     Type: AWS::Lambda::Version
 
   ##########################
