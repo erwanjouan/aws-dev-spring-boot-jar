@@ -60,6 +60,13 @@ Resources:
       RetentionInDays: 90
     Type: AWS::Logs::LogGroup
 
+  LambdaDevAlias:
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      FunctionVersion: '\$LATEST'
+      Name: !Ref LambdaAlias
+    Type: AWS::Lambda::Alias
+
   ##########################
   # Api Gateway
   ##########################
