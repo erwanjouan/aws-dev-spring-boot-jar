@@ -67,6 +67,14 @@ Resources:
       Name: !Ref LambdaAlias
     Type: AWS::Lambda::Alias
 
+  LambdaVersion:
+    Properties:
+      FunctionName: !Sub '${LambdaFunction.Arn}:${LambdaAlias}'
+      Description: !Ref ProjectVersion
+    DependsOn:
+      - LambdaDevAlias
+    Type: AWS::Lambda::Version
+
   ##########################
   # Api Gateway
   ##########################
