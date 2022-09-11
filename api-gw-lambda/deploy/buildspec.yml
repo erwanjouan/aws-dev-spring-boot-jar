@@ -16,6 +16,7 @@ phases:
     commands:
       - export TARGET_FUNCTION_VERSION=$(aws lambda publish-version
                               --function-name ${PROJECT_DEPLOYMENT_NAME}
+                              --description ${CODEBUILD_RESOLVED_SOURCE_VERSION}
                               --query "Version"
                               --output text)
           && aws lambda create-alias
