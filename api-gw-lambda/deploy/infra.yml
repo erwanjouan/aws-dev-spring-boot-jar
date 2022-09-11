@@ -69,7 +69,7 @@ Resources:
 
   LambdaVersion:
     Properties:
-      FunctionName: !Sub '${LambdaFunction.Arn}:${LambdaAlias}'
+      FunctionName: !Ref LambdaFunction
       Description: !Ref ProjectVersion
     DependsOn:
       - LambdaDevAlias
