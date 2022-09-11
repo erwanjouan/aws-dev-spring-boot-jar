@@ -122,6 +122,8 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/*
+    DependsOn:
+      - LambdaDevAlias
     Type: AWS::Lambda::Permission
 
   ###############
